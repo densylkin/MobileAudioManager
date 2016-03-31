@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Events;
 
 public class AudioChannel : MonoBehaviour
 {
@@ -9,7 +10,7 @@ public class AudioChannel : MonoBehaviour
     public float FadeInDuration = 0.5f;
     public float FadeOutDuration = 0.5f;
 
-    public event Action<AudioChannel> FinishedPlaying;
+    public UnityEvent<AudioChannel> OnFinishedPlaying;
 
     [SerializeField, HideInInspector]
     public AudioSource Source;
@@ -31,18 +32,24 @@ public class AudioChannel : MonoBehaviour
         get { return Clip != null ? Source.timeSamples/Clip.samples : 0f; }
     }
 
+    /// <summary>
+    /// Get current clip Length
+    /// </summary>
     public float ClipLength
     {
         get { return Source.clip.length; }
     }
 
+    /// <summary>
+    /// Get current playback time
+    /// </summary>
     public float PlayTime
     {
         get { return Source.time; }
     }
 
     /// <summary>
-    /// 
+    /// Is channel finished playing
     /// </summary>
     public bool Finished
     {
@@ -75,8 +82,8 @@ public class AudioChannel : MonoBehaviour
 
     private void Update()
     {
-        if(Finished && Playing)
-            OnFinished(this);
+        if (Finished && Playing)
+            OnFinishedPlaying.Invoke(this);
     }
 
     /// <summary>
@@ -146,36 +153,23 @@ public class AudioChannel : MonoBehaviour
     }
 
     /// <summary>
-    /// 
+    /// Fade volume to 0
     /// </summary>
-    [ContextMenu("FadeIn")]
     public IEnumerator FadeIn()
     {
         yield return StartCoroutine(FadeTo(Source.volume, 0f, FadeInDuration));
     }
 
     /// <summary>
-    /// 
+    /// Fade volume to 1
     /// </summary>
-    [ContextMenu("FadeOut")]
     public IEnumerator FadeOut()
     {
         yield return StartCoroutine(FadeTo(Source.volume, 1f, FadeOutDuration));
     }
 
     /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="obj"></param>
-    protected virtual void OnFinished(AudioChannel obj)
-    {
-        var handler = FinishedPlaying;
-        if (handler != null) 
-            handler(obj);
-    }
-
-    /// <summary>
-    /// 
+    /// Fade volume to specified value
     /// </summary>
     /// <param name="value"></param>
     /// <returns></returns>

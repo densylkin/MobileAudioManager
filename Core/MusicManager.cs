@@ -8,6 +8,7 @@ public class MusicManager : MonoBehaviour
     private static MusicManager _instance;
     public static MusicManager Instance { get { return _instance ?? (_instance = FindObjectOfType<MusicManager>());} }
 
+    public int MusicChannel = 0;
     public bool Shuffle;
     public float FadeDuration = 3f;
     public List<AudioClip> Tracks = new List<AudioClip>();
@@ -20,8 +21,8 @@ public class MusicManager : MonoBehaviour
 
     private void Start()
     {
-        _musicChannel = AudioManager.GetChannel(AudioManager.Channel.Music);
-        _musicChannel.FinishedPlaying += FinishedCurrent;
+        _musicChannel = AudioManager.GetChannel(MusicChannel);
+        _musicChannel.OnFinishedPlaying.AddListener(FinishedCurrent);
         StartCoroutine(PlayList());
     }
 
@@ -96,59 +97,6 @@ public class MusicManager : MonoBehaviour
             yield return null;
         }
     }
-
-    //private IEnumerator PlaySongE(AudioClip clip)
-    //{
-    //    source.Stop();
-    //    source.clip = clip;
-    //    source.Play();
-    //    StartCoroutine(FadeIn());
-    //    while (source.isPlaying)
-    //    {
-    //        if (source.clip.length - source.time <= FadeDuration)
-    //        {
-    //            yield return StartCoroutine(FadeOut());
-    //        }
-    //        yield return null;
-    //    }
-    //}
-
-    private int _counter = 0;
-
-    //private IEnumerator PlayMusicList()
-    //{
-    //    while (true)
-    //    {
-    //        yield return StartCoroutine(PlaySongE(Playlist.MusicList[_counter]));
-    //        if (Repeat == RepeatMode.Track)
-    //        {
-
-    //        }
-    //        else if (Shuffle)
-    //        {
-    //            int newTrack = GetNewTrack();
-    //            while (newTrack == _counter && Playlist.MusicList.Length != 1)
-    //            {
-    //                newTrack = GetNewTrack();
-    //            }
-    //            _counter = newTrack;
-
-    //        }
-    //        else
-    //        {
-    //            _counter++;
-    //            if (_counter >= Playlist.MusicList.Length - 1)
-    //            {
-    //                if (Repeat == RepeatMode.Playlist)
-    //                {
-    //                    _counter = 0;
-    //                }
-    //                else
-    //                    yield break;
-    //            }
-    //        }
-    //    }
-    //}
 
     private void SetRandomTrack()
     {

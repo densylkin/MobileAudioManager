@@ -10,14 +10,6 @@ using UnityEditor;
 [AddComponentMenu("Audio/Manager")]
 public class AudioManager : MonoBehaviour
 {
-    public enum Channel
-    {
-        Music = 0,
-        First = 1,
-        Second = 2, 
-        Third = 3
-    }
-
     private static AudioManager _instance;
 
     public static AudioManager Instance
@@ -35,6 +27,8 @@ public class AudioManager : MonoBehaviour
             return _instance;
         }
     }
+
+    public int ChannelsAmount = 4;
 
     [SerializeField, HideInInspector]
     private AudioChannel[] _channels;
@@ -60,7 +54,7 @@ public class AudioManager : MonoBehaviour
     [MenuItem("GameObject/Create Other/AudioManager")]
     public static void Create()
     {
-        if (Instance != null)
+        if (FindObjectOfType<AudioManager>() != null)
         {
             Debug.Log("AudioManager already exists!");
             return;
@@ -95,39 +89,48 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    public static AudioChannel GetChannel(Channel channel)
+    public static AudioChannel GetChannel(int channel)
     {
-        return Instance._channels[(int) channel];
+        return Instance._channels[channel];
     }
 
-    public static void Play(string clipName, Channel channel = Channel.First, float pitch = 1f, float volume = 1f)
+    public static void Play(string clipName, int channel = 1, float pitch = 1f, float volume = 1f)
     {
         Play(Load(clipName), channel, pitch, volume);
     }
 
-    public static void Play(AudioClip clip, Channel channel = Channel.First, float pitch = 1f, float volume = 1f)
+    public static void Play(AudioClip clip, int channel = 1, float pitch = 1f, float volume = 1f)
     {
-        if (clip == null)
+        if (clip == null || channel > Instance.ChannelsAmount - 1)
             return;
 
-        var c = Instance._channels[(int) channel];
+        var c = Instance._channels[channel];
         c.Source.pitch = pitch;
         c.Source.volume = volume;
         c.Play(clip);
     }
 
-    public static void Pause(Channel channel)
+    public static void Pause(int channel)
     {
-        Instance._channels[(int) channel].Pause();
+        Instance._channels[channel].Pause();
     }
 
-    public void Stop(Channel channel)
+    public void Stop(int channel)
     {
-        Instance._channels[(int) channel].Stop();
+        Instance._channels[channel].Stop();
     }
 
     public static AudioClip Load(string clipName)
     {
-        return Instance._clips.ContainsKey(clipName) ? Instance._clips[clipName] : Resources.Load<AudioClip>(clipName);
+        if (Instance._clips.ContainsKey(clipName))
+        {
+            return Instance._clips[clipName];
+        }
+        else
+        {
+            var clip = Resources.Load<AudioClip>(clipName);
+            Instance._clips.Add(clip.name, clip);
+            return clip;
+        }
     }
 }

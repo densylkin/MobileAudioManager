@@ -40,7 +40,7 @@ public class MusicManagerInspector : Editor
         Undo.RecordObject(Manager, "Music manager");
         serializedObject.Update();
 
-        PlayControl();
+        PlayControls();
         EditorGUILayout.PropertyField(serializedObject.FindProperty("Shuffle"));
 
         EditorGUIExtentions.DropZone<AudioClip>(PrefabType.None, list => Manager.Tracks.AddRange(list.Except(Manager.Tracks)), _dropBoxStyle);
@@ -74,7 +74,7 @@ public class MusicManagerInspector : Editor
         }
     }
 
-    private void PlayControl()
+    private void PlayControls()
     {
         if(!Application.isPlaying)
             return;
